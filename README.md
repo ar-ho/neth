@@ -16,7 +16,7 @@ neth -h for instructions
 # Neth - NetHelper
 Neth is a commandline tool made for configuring and managing multiple network devices like switches and routers at the same time. All you need is Python and Netmiko installed on your machine and SSH access to the network devices.
 
-Instead of tediously logging in to each device manually, just put your commands and device IPs in a file, run Neth and it will connect to each device, run the commands and save the output automaically.
+Instead of tediously logging in to each device manually, just put your commands and device IPs in a file, run Neth and it will connect to each device, run the commands and save the output automatically.
 
 Neth supports both show and configuration commands, error handling, logging, per device output files and more. Making it a great tool for network configuration, administration and troubleshooting.
 
@@ -25,46 +25,13 @@ Neth supports both show and configuration commands, error handling, logging, per
 ## 🏆 Motivation
 
 
-Building a game like this is a great way to develop programming skills because it provides immediate visual feedback. Every change in the code can be directly seen in the behavior of the game.  
-Working on a game project also offers practical experience with problem-solving, game logic, collision detection, user input, and graphical rendering. Progress is visible from the beginning which helps to maintain motivation.
-
-## 💬 Disclaimer:
-This is a project that started out from boot.dev - I recommend to check them out!  
-The source code is not entirely written by me.    
-Especially the math was done for me by boot.dev.  
-I added and will add more features myself as time goes on. 
-
 ## 🚀 Quick Start
 ### Linux
-1. Install Git and Python3 via the commandline.
 
-2. Create and navigate to the directory where you want to store the repo:
-```
-mkdir ~/projects
-cd ~/projects
-```
-
-3. Clone the repository:
-```
-git clone https://github.com/ar-ho/astroblast.git
-```
-
-4. Execute main.py.
-```
-python3 ~/projects/astroblast/main.py
-```
 
 ### Windows
-1. Install Git and Python3.
-
-2. Add Git and Python3 to your PATH environment variable.
-
-3. Clone the repo using the Git bash cli for windows.
-
-4. Execute main.py
 
 ## 📖 Usage
-- Use WASD keys to move and space for shooting.
 
 ## 🤝 Contributing
 Feel free to clone, use and enhance this code.

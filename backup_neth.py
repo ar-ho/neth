@@ -12,8 +12,23 @@ from netmiko.exceptions import (
 )
 
 # ============================================================
-# BANNER
+# FUNCTIONS
 # ============================================================
+def open_commands(commands_file: str = "commands.txt") -> list[str]:
+    with open(commands_file) as f:
+        return f.read().splitlines()
+# open the file commands.txt which contains the commands to execute
+
+def open_devices(devices_file: str = "devices.txt") -> list[str]:
+    with open(devices_file) as f:
+        return f.read().splitlines()
+# open the file devices.txt which contains the IP address of the devices to connect to
+ 
+def open_output(output_file: str = "output.txt") -> list[str]:
+    with open(output_file) as f:
+        return f.read().splitlines()
+# open the file output.txt, a file to redirect the output to 
+
 def banner():
     print(r"""
 
@@ -32,109 +47,101 @@ def banner():
     """
     )
 
-# ============================================================
-# OPEN FILES
-# ============================================================
-def open_commands(commands_file: str = "commands.txt") -> list[str]:
-    with open(commands_file) as f:
-        return f.read().splitlines()
-        # open the file commands.txt which contains the commands to execute
-
-def open_devices(devices_file: str = "devices.txt") -> list[str]:
-    with open(devices_file) as f:
-        return f.read().splitlines()
-        # open the file devices.txt which contains the IP address of the devices 
-        # to connect to
- 
-def open_output(output_file: str = "output.txt") -> list[str]:
-    with open(output_file) as f:
-        return f.read().splitlines()
-        # open the file output.txt, a file to redirect the output to 
-
-# ============================================================
-# LOGGING
-# ============================================================
-def configure_logging() -> None:
-    logging.basicConfig(
-        level = logging.INFO,
-        format = "%(asctime)s - %(levelname)s - %(message)s",
-        datefmt = "%Y-%m-%d %H:%M:%S",
-    )
-
-    logging.getLogger("paramiko").setLevel(logging.WARNING)
-    # raise paramiko logging level to warning 
-    # to reduce spam output in the console
+banner()
+# call the banner function to print the banner at the start of the script
+# see functions section for more info
 
 # ============================================================
 # COMMAND LINE PARSER
 # ============================================================
-def parse_arguments() -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="Connect to Cisco IOS devices using Netmiko and execute commands."
-    )
-    # argparse is the module used to create the help output when using python <script-name> --help
-    # argparse.ArgumentParser is the class used to create the argument parser
-    # the instance is saved in parser
+parser = argparse.ArgumentParser(
+    description="Connect to Cisco IOS devices using Netmiko and execute commands."
+)
+# argparse is the module used to create the help output when using python <script-name> --help
+# argparse.ArgumentParser is the class used to create the argument parser
+# the instance is saved in parser
 
-    parser.add_argument(
-        "-d", "--devices",
-        default="devices.txt",
-        help="Path to the file containing device IP addresses (default: devices.txt)"
-    )
-    # parser.add_argument creates an option for python3 <script-name> --devices or -d 
-    # to specify a file containing device IP addresses
-    # the default is devices.txt
+parser.add_argument(
+    "-d", "--devices",
+    default="devices.txt",
+    help="Path to the file containing device IP addresses (default: devices.txt)"
+)
+# parser.add_argument creates an option for python3 <script-name> --devices or -d 
+# to specify a file containing device IP addresses
+# the default is devices.txt
 
-    parser.add_argument(
-        "-c", "--commands",
-        default="commands.txt",
-        help="Path to the file containing configuration commands (default: commands.txt)"
-    )
-    # same as above but for the commands file
+parser.add_argument(
+    "-c", "--commands",
+    default="commands.txt",
+    help="Path to the file containing configuration commands (default: commands.txt)"
+)
+# same as above but for the commands file
 
-    parser.add_argument(
-        "-m", "--mode",
-        default="show",
-        choices=["show", "config"],
-        help="Execute the commands from the file in privileged exec mode (show) or configuration mode (config) (default: show)"
-    )
-    # same as above but for the mode of execution, either show or config
-    # you can use it like this script.py --mode show or script.py --mode config
+parser.add_argument(
+    "-m", "--mode",
+    default="show",
+    choices=["show", "config"],
+    help="Execute the commands from the file in privileged exec mode (show) or configuration mode (config) (default: show)"
+)
+# same as above but for the mode of execution, either show or config
+# you can use it like this script.py --mode show or script.py --mode config
 
-    return parser.parse_args()
+args = parser.parse_args()
+# reads the command-line arguments that the user passed to the script, 
+# validates them, and stores the results in an object
+# afterwards you can use the provided arguments 
+# e.g. you can use the provided file which holds the commands like this: args.commands
+# or the file that holds the devices like this: args.devices
+
+# ============================================================
+# LOGGING
+# ============================================================
+logging.basicConfig(
+    level = logging.INFO,
+    format = "%(asctime)s - %(levelname)s - %(message)s",
+    datefmt = "%Y-%m-%d %H:%M:%S",
+)
+
+logging.getLogger("paramiko").setLevel(logging.WARNING)
+# raise paramiko logging level to warning to reduce spammy output in the console
 
 # ============================================================
 # CREDENTIALS
 # ============================================================
-def credentials() -> tuple[str, str]:
-    username: str = input('Enter your SSH username: ')
-    password: str = getpass()
-    return username, password
+username: str = input('Enter your SSH username: ')
+password: str = getpass()
+# get credentials from the user for the devices to connect to
+# not done via command line arguments for security reasons
 
 # ============================================================
-# PROCESS DEVICE AND ERROR HANDLING
+# LOAD COMMANDS AN PROCESSING LOOP
 # ============================================================
-def process_device(device: str, commands: [str], credentials: tuple[str, str], mode: str) -> None:
+commands = open_commands(args.commands)
+# places the file provided by the user which is specified via args.commands via commandline arguments in open_commands()
+# the default for args.commands is commands.txt
+
+for device in open_devices(args.devices):
+    logging.info(f"Connecting to {device}")
+    ios_device = {
+        'device_type': 'cisco_ios',
+        'ip': device,
+        'username': username,
+        'password': password
+    }
+# iterate over the devices e.g. IPs from args.devices file 
+# and store the data in a dictionary to connect to the device via netmiko
+
+# ============================================================
+# EXECUTE COMMANDS ON DEVICES
+# ============================================================
     try:
-        logging.info(f"Trying to connect to {device} ...")
-
-        ios_device = {
-            'device_type': 'cisco_ios',
-            'ip': device,
-            'username': credentials[0],
-            'password': credentials[1]
-        }
-        # iterate over the devices e.g. IPs from args.devices file 
-        # and store the data in a dictionary to connect to the device 
-        # via netmiko ConnectHandler in the next step
-
         net_connect = ConnectHandler(**ios_device)
         # create the connection to the device using the data from the dictionary ios_device
         logging.info(f"Connection established to {net_connect.find_prompt()}")
         # prints the prompt of the current device e.g. ASW1#
 
         output = ""
-        if mode == "show":
+        if args.mode == "show":
             # if the user specified show mode via script.py --mode show, execute the commands in privileged exec mode
             for command in commands:
                 # read in a line i.e. a command from the commands.txt file and store it in the variable command
@@ -154,7 +161,7 @@ def process_device(device: str, commands: [str], credentials: tuple[str, str], m
                 output += "\n\n\n"
                 # create some space between the output of the commands to make it more readable
 
-        elif mode == "config":
+        elif args.mode == "config":
             # if the user specified config mode via script.py --mode config, execute the commands in configuration mode
             output = net_connect.send_config_set(commands)
             # we can provide the commands file directly to send_config_set()
@@ -178,6 +185,9 @@ def process_device(device: str, commands: [str], credentials: tuple[str, str], m
         # disconnect and move on to the next iteration of the for loop 
         # to execute the same steps on the next device
 
+# ============================================================
+# ERROR HANDLING
+# ============================================================
     except NetmikoAuthenticationException as e:
         logging.error(f"[AUTH ERROR] {device}: Authentication failed - {e}")
 
@@ -205,33 +215,3 @@ def process_device(device: str, commands: [str], credentials: tuple[str, str], m
 
     except Exception as e:
         logging.error(f"[ERROR] {device}: {type(e).__name__} - {e}")
-
-# ============================================================
-# MAIN
-# ============================================================ 
-def main():
-    banner()
-    # call the banner function to print the banner at the start of the script
-
-    configure_logging()
-
-    args: argparse.Namespace = parse_arguments()
-    # reads the command-line arguments that the user passed to the script, 
-    # validates them and stores the results in an object
-    # afterwards you can use the provided arguments 
-    # e.g. you can use the provided file which holds the commands like this: args.commands
-    # or the file that holds the devices like this: args.devices
-
-    commands: list[str] = open_commands(args.commands)
-
-    get_credentials:tuple[str, str] = credentials()
-    # credentials() returns a tuple 
-    # with element[0] = username and element[1] = password
-
-    for device in open_devices(args.devices):
-        process_device(device, commands, get_credentials, args.mode)
-        # call the process_device function to connect to the device and execute the commands
-        # pass the device IP, commands list, credentials tuple and args.mode to the function
-
-if __name__ == "__main__":
-    main()

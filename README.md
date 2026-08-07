@@ -46,12 +46,12 @@ apt install python3-pip -y
 pip install telnetlib3 --break-system-packages
 pip install -U netmiko --break-system-packages
 
-### TO DO
+### 🏗️ TO DO
 Your script is already at a good level for a personal network automation tool. The next improvements are less about "making it work" and more about making it maintainable, safer, and closer to production-quality automation.
 
 Here are the improvements I would prioritize:
 
-1. Use the logging module instead of print() (high priority)
+1. Use the logging module instead of print() (high priority) ✅
 
 Right now:
 
@@ -111,7 +111,7 @@ main()
 
 if __name__ == "__main__":
     main()
-3. Add a device_type argument
+3. Add a device_type argument (Make it truly multi vendor)
 
 Currently:
 

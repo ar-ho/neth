@@ -78,6 +78,7 @@ options:
   -m, --mode {show,config}
                         Execute the commands from the file in privileged exec mode (show) or configuration mode
                         (config) (default: show)
+                        
 ```
 
 ## 🤝 Contributing

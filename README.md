@@ -63,7 +63,7 @@ After cloning the repository ```run neth.py --help``` to display the available o
 
 ## 📖 Usage
 ```
-usage: neth.py [-h] [-d DEVICES] [-c COMMANDS] [-m {show,config}]
+usage: neth.py [-h] [-d DEVICES] [-c COMMANDS] [-t TYPE] [-m {show,config}]
 
 Connect to Cisco IOS devices using Netmiko and execute commands.
 
@@ -73,9 +73,12 @@ options:
                         Path to the file containing device IP addresses (default: devices.txt)
   -c, --commands COMMANDS
                         Path to the file containing configuration commands (default: commands.txt)
+  -t, --type TYPE       Specify the vendor type (default: cisco_ios, example options: cisco_xe, cisco_asa,
+                        juniper_junos, arista_eos for more info see netmiko supported platforms)
   -m, --mode {show,config}
                         Execute the commands from the file in privileged exec mode (show) or configuration mode
                         (config) (default: show)
+                        
 ```
 
 ## 🤝 Contributing

@@ -20,14 +20,27 @@ Instead of tediously logging in to each device manually, just put your commands 
 
 Neth supports both show and configuration commands, error handling, logging, per device output files and more. Making it a great tool for network configuration, administration and troubleshooting.
 
-![Gameplay](gameplay.gif) 
+![Screenshot](screen.jpg) 
 
 ## 🏆 Motivation
+The motivation behind this script is to provide an easy to use, powerful script that runs anywhere with minimal overhead and a small number of requirements. 
+The main goals I wanted to achieve were the following: 
+- Multi device support to save time on manual and repetitive configuration tasks.
+- Multi vendor support.
+- Platform independence.
+- Easy to use.
 
+This script can be used by non technical people easily.
+This makes it useful for many everyday network-related tasks. 
+For example, sales employees could use it to check the software version across multiple devices, while support engineers could configure a new user on all devices in a network without having to log in to each device manually.
 
 ## 🚀 Quick Start
 ### Linux
-
+apt update
+apt upgrade -y
+apt install python3 -y
+apt install python3-pip -y
+pip install -U netmiko --break-system-packages
 
 ### Windows
 
@@ -38,15 +51,7 @@ Feel free to clone, use and enhance this code.
 ### Submit a pull request
 If you would like to contribute, please fork the repository and open a pull request to the `main` branch.
 
-### INSTALLATION on the ubuntu box in GNS3
-apt update
-apt upgrade -y
-apt install python3 -y
-apt install python3-pip -y
-pip install telnetlib3 --break-system-packages
-pip install -U netmiko --break-system-packages
-
-### 🏗️ TO DO
+## 🏗️ TO DO
 Your script is already at a good level for a personal network automation tool. The next improvements are less about "making it work" and more about making it maintainable, safer, and closer to production-quality automation.
 
 Here are the improvements I would prioritize:

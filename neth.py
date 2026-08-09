@@ -93,11 +93,18 @@ def parse_arguments() -> argparse.Namespace:
     # same as above but for the commands file
 
     parser.add_argument(
+        "-t", "--type",
+        default="cisco_ios",
+        help="Specify the vendor type (default: cisco_ios, example options: cisco_xe, cisco_asa, juniper_junos, arista_eos for more info see netmiko supported platforms)"
+    )
+
+    parser.add_argument(
         "-m", "--mode",
         default="show",
         choices=["show", "config"],
         help="Execute the commands from the file in privileged exec mode (show) or configuration mode (config) (default: show)"
     )
+
     # same as above but for the mode of execution, either show or config
     # you can use it like this script.py --mode show or script.py --mode config
 
@@ -114,12 +121,12 @@ def credentials() -> tuple[str, str]:
 # ============================================================
 # PROCESS DEVICE AND ERROR HANDLING
 # ============================================================
-def process_device(device: str, commands: [str], credentials: tuple[str, str], mode: str) -> None:
+def process_device(device: str, commands: [str], credentials: tuple[str, str], mode: str, type: str) -> None:
     try:
         logging.info(f"Trying to connect to {device} ...")
 
         ios_device = {
-            'device_type': 'cisco_ios',
+            'device_type': type,
             'ip': device,
             'username': credentials[0],
             'password': credentials[1]
@@ -198,7 +205,7 @@ def process_device(device: str, commands: [str], credentials: tuple[str, str], m
 
     except KeyboardInterrupt:
         logging.info("\n[INFO] Script interrupted by user.")
-        break
+        #break
 
     except OSError as e:
         logging.error(f"[OS ERROR] {device}: {e}")
@@ -229,7 +236,7 @@ def main():
     # with element[0] = username and element[1] = password
 
     for device in open_devices(args.devices):
-        process_device(device, commands, get_credentials, args.mode)
+        process_device(device, commands, get_credentials, args.mode, args.type)
         # call the process_device function to connect to the device and execute the commands
         # pass the device IP, commands list, credentials tuple and args.mode to the function
 

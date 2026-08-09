@@ -74,7 +74,7 @@ options:
   -c, --commands COMMANDS
                         Path to the file containing configuration commands (default: commands.txt)
   -t, --type TYPE       Specify the vendor type (default: cisco_ios, example options: cisco_xe, cisco_asa,
-                        juniper_junos, aruba_os, mikrotik_routeros etc.)
+                        juniper_junos, arista_eos for more info see netmiko supported platforms)
   -m, --mode {show,config}
                         Execute the commands from the file in privileged exec mode (show) or configuration mode
                         (config) (default: show)

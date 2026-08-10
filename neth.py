@@ -3,6 +3,7 @@
 # ============================================================
 from getpass import getpass
 from netmiko import ConnectHandler
+from datetime import datetime
 import argparse
 import logging
 from netmiko.exceptions import (
@@ -33,19 +34,42 @@ def banner():
     )
 
 # ============================================================
+# CUSTOM EXCEPTIONS
+# ============================================================
+
+class FileEmptyError(Exception):
+    """Raised when an input file is empty."""
+    pass
+
+# ============================================================
 # OPEN FILES
 # ============================================================
 def open_commands(commands_file: str = "commands.txt") -> list[str]:
     with open(commands_file) as f:
-        return f.read().splitlines()
-        # open the file commands.txt which contains the commands to execute
+        commands = [line.strip() for line in f if line.strip()]
+        # line.strip() removes whitespace from the beginning and end of each line
+        # if line.strip() filters out lines that are empty or contain only whitespace.
+        # otherwise FileEmptyError wouldn't get raised because an empty character in the file
+        # would prevent the raise
+
+    if not commands:
+        raise FileEmptyError(f"The commands file '{commands_file}' is empty.")
+        # raise a custom exception if the commands file is empty
+    return commands
 
 def open_devices(devices_file: str = "devices.txt") -> list[str]:
     with open(devices_file) as f:
-        return f.read().splitlines()
-        # open the file devices.txt which contains the IP address of the devices 
-        # to connect to
- 
+        devices = [line.strip() for line in f if line.strip()]
+        # line.strip() removes whitespace from the beginning and end of each line
+        # if line.strip() filters out lines that are empty or contain only whitespace.
+        # otherwise FileEmptyError wouldn't get raised because an empty character in the file
+        # would prevent the raise
+
+        if not devices:
+            raise FileEmptyError(f"The devices file '{devices_file}' is empty.")
+            # raise a custom exception if the devices file is empty
+    return devices
+
 def open_output(output_file: str = "output.txt") -> list[str]:
     with open(output_file) as f:
         return f.read().splitlines()
@@ -125,17 +149,21 @@ def process_device(device: str, commands: [str], credentials: tuple[str, str], m
     try:
         logging.info(f"Trying to connect to {device} ...")
 
-        ios_device = {
-            'device_type': type,
-            'ip': device,
-            'username': credentials[0],
-            'password': credentials[1]
+        device_config = {
+            "device_type": type,
+            "ip": device,
+            "username": credentials[0],
+            "password": credentials[1],
+            "timeout": 10,
+            # general socket timeout used by the underlying connection
+            "conn_timeout": 10
+            # controls how long netmiko waits while establishing the SSH connection
         }
         # iterate over the devices e.g. IPs from args.devices file 
         # and store the data in a dictionary to connect to the device 
         # via netmiko ConnectHandler in the next step
 
-        net_connect = ConnectHandler(**ios_device)
+        net_connect = ConnectHandler(**device_config)
         # create the connection to the device using the data from the dictionary ios_device
         logging.info(f"Connection established to {net_connect.find_prompt()}")
         # prints the prompt of the current device e.g. ASW1#
@@ -154,7 +182,8 @@ def process_device(device: str, commands: [str], credentials: tuple[str, str], m
                 logging.info(f"Trying to execute {command}")
                 output += net_connect.send_command(
                     command,
-                    read_timeout=60,
+                    read_timeout=60
+                    # controls how long send_command() waits for the command to execute
                 )
                 # send the command to the device and store the output in the variable output
                 # iterate over the commands in the commands.txt file until all commands have been executed
@@ -175,11 +204,11 @@ def process_device(device: str, commands: [str], credentials: tuple[str, str], m
         # send_command() cannot directly execute commands from a file, 
         # so we have to iterate over the commands in the file 
 
-        with open(f"{device}.txt", "w") as logfile:
+        with open(f"{device}_{datetime.now().strftime('%d%m%Y_%H%M')}.txt", "w") as logfile:
             logfile.write(output)
         net_connect.disconnect()
         # the output of the commands is stored in a variable named output
-        # write the output of the commands from commands.txt to a file named IP + .txt
+        # write the output of the commands from commands.txt to a file named IP + timestamp + .txt
 
         logging.info(f"Completed execution on {device}\n")
         # disconnect and move on to the next iteration of the for loop 
@@ -231,12 +260,23 @@ def main():
         get_credentials:tuple[str, str] = credentials()
         # credentials() returns a tuple 
         # with element[0] = username and element[1] = password
+
         for device in open_devices(args.devices):
             process_device(device, commands, get_credentials, args.mode, args.type)
             # call the process_device function to connect to the device and execute the commands
             # pass the device IP, commands list, credentials tuple and args.mode to the function
+
     except KeyboardInterrupt:
         logging.info("\n[INFO] Script interrupted by user.")
-        
+
+    except FileNotFoundError as e:
+        logging.error(f"[FILE ERROR] File not found: {e}")
+
+    except PermissionError as e:
+        logging.error(f"[PERMISSION ERROR] Permission denied: {e}")
+
+    except FileEmptyError as e:
+        logging.error(f"[FILE EMPTY ERROR] Empty file: {e}")
+
 if __name__ == "__main__":
     main()

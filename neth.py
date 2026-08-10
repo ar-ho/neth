@@ -203,10 +203,6 @@ def process_device(device: str, commands: [str], credentials: tuple[str, str], m
     except EOFError as e:
         logging.error(f"[EOF ERROR] {device}: Unexpected end of input - {e}")
 
-    except KeyboardInterrupt:
-        logging.info("\n[INFO] Script interrupted by user.")
-        #break
-
     except OSError as e:
         logging.error(f"[OS ERROR] {device}: {e}")
 
@@ -217,28 +213,30 @@ def process_device(device: str, commands: [str], credentials: tuple[str, str], m
 # MAIN
 # ============================================================ 
 def main():
-    banner()
-    # call the banner function to print the banner at the start of the script
+    try:
+        banner()
+        # call the banner function to print the banner at the start of the script
 
-    configure_logging()
+        configure_logging()
 
-    args: argparse.Namespace = parse_arguments()
-    # reads the command-line arguments that the user passed to the script, 
-    # validates them and stores the results in an object
-    # afterwards you can use the provided arguments 
-    # e.g. you can use the provided file which holds the commands like this: args.commands
-    # or the file that holds the devices like this: args.devices
+        args: argparse.Namespace = parse_arguments()
+        # reads the command-line arguments that the user passed to the script, 
+        # validates them and stores the results in an object
+        # afterwards you can use the provided arguments 
+        # e.g. you can use the provided file which holds the commands like this: args.commands
+        # or the file that holds the devices like this: args.devices
 
-    commands: list[str] = open_commands(args.commands)
+        commands: list[str] = open_commands(args.commands)
 
-    get_credentials:tuple[str, str] = credentials()
-    # credentials() returns a tuple 
-    # with element[0] = username and element[1] = password
-
-    for device in open_devices(args.devices):
-        process_device(device, commands, get_credentials, args.mode, args.type)
-        # call the process_device function to connect to the device and execute the commands
-        # pass the device IP, commands list, credentials tuple and args.mode to the function
-
+        get_credentials:tuple[str, str] = credentials()
+        # credentials() returns a tuple 
+        # with element[0] = username and element[1] = password
+        for device in open_devices(args.devices):
+            process_device(device, commands, get_credentials, args.mode, args.type)
+            # call the process_device function to connect to the device and execute the commands
+            # pass the device IP, commands list, credentials tuple and args.mode to the function
+    except KeyboardInterrupt:
+        logging.info("\n[INFO] Script interrupted by user.")
+        
 if __name__ == "__main__":
     main()

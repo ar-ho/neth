@@ -238,7 +238,7 @@ def process_device(device: str, commands: list[str], credentials: tuple[str, str
 
     except NetmikoAuthenticationException as e:
         logging.error(f"[AUTH ERROR] {device}: Authentication failed - {e}")
-        error_dict[device] = f"[AUTH ERROR] {device}: Authentication failed"
+        error_dict[device] = f"[AUTH ERROR] {device} : Authentication failed"
 
     except NetmikoTimeoutException as e:
         logging.error(f"[TIMEOUT] {device}: Connection timed out - {e}")

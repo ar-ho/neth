@@ -13,30 +13,49 @@ from netmiko.exceptions import (
 )
 
 # ============================================================
-# BANNER
+# VARS AND DEFINITIONS
+# ============================================================
+success_counter: int = 0
+fail_counter: int = 0
+error_dict: dict[str, str] = {}
+
+# ============================================================
+# BANNER AND SUMMARY
 # ============================================================
 def banner():
-    print(r"""
+	print(r"""\
+#    # ###### ##### #    # 
+##   # #        #   #    # 
+# #  # #####    #   ###### 
+#  # # #        #   #    # 
+#   ## #        #   #    # 
+#    # ######   #   #    # 
 
-    #    # ###### ##### #    # 
-    ##   # #        #   #    # 
-    # #  # #####    #   ###### 
-    #  # # #        #   #    # 
-    #   ## #        #   #    # 
-    #    # ######   #   #    # 
+Neth - NetHelper
+Network Configuration Tool
+Multi Vendor | Netmiko | SSH
 
-    Neth - NetHelper
-    Network Configuration Tool
-    Multi Vendor | Netmiko | SSH
+neth -h for instructions
+""")
+# the \ in print(r"""\ is used to escape the newline character 
+# and print the banner without indentation on the commandline
 
-    neth -h for instructions
-    """
-    )
+def summary(success_counter: int, fail_counter: int, error_dict: dict[str, str]):
+    print(f"""\
+==============================
+Execution Summary
+==============================
+Successful: {success_counter}
+Failed: {fail_counter}
+
+Failed devices:\
+""")
+    for device in error_dict:
+        print(f"{error_dict[device]}")
 
 # ============================================================
 # CUSTOM EXCEPTIONS
 # ============================================================
-
 class FileEmptyError(Exception):
     """Raised when an input file is empty."""
     pass
@@ -94,7 +113,7 @@ def configure_logging() -> None:
 # ============================================================
 def parse_arguments() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="Connect to Cisco IOS devices using Netmiko and execute commands."
+        description=""
     )
     # argparse is the module used to create the help output when using python <script-name> --help
     # argparse.ArgumentParser is the class used to create the argument parser
@@ -145,7 +164,7 @@ def credentials() -> tuple[str, str]:
 # ============================================================
 # PROCESS DEVICE AND ERROR HANDLING
 # ============================================================
-def process_device(device: str, commands: [str], credentials: tuple[str, str], mode: str, type: str) -> None:
+def process_device(device: str, commands: list[str], credentials: tuple[str, str], mode: str, type: str, error_dict: dict[str, str]) -> bool:
     try:
         logging.info(f"Trying to connect to {device} ...")
 
@@ -170,7 +189,8 @@ def process_device(device: str, commands: [str], credentials: tuple[str, str], m
 
         output = ""
         if mode == "show":
-            # if the user specified show mode via script.py --mode show, execute the commands in privileged exec mode
+            # if the user specified show mode via script.py --mode show, 
+            # execute the commands in privileged exec mode aka enable mode
             for command in commands:
                 # read in a line i.e. a command from the commands.txt file and store it in the variable command
                 #output += f"\n{'=' * 60}\n"
@@ -214,34 +234,44 @@ def process_device(device: str, commands: [str], credentials: tuple[str, str], m
         # disconnect and move on to the next iteration of the for loop 
         # to execute the same steps on the next device
 
+        return True
+
     except NetmikoAuthenticationException as e:
         logging.error(f"[AUTH ERROR] {device}: Authentication failed - {e}")
+        error_dict[device] = f"[AUTH ERROR] {device} : Authentication failed"
 
     except NetmikoTimeoutException as e:
         logging.error(f"[TIMEOUT] {device}: Connection timed out - {e}")
+        error_dict[device] = f"[TIMEOUT] {device}: Connection timed out"
 
     except ConfigInvalidException as e:
         logging.error(f"[CONFIG ERROR] {device}: Invalid configuration command - {e}")
+        error_dict[device] = f"[CONFIG ERROR] {device}: Invalid configuration command"
 
     except FileNotFoundError as e:
         logging.error(f"[FILE ERROR] {device}: File not found - {e}")
+        error_dict[device] = f"[FILE ERROR] {device}: File not found"
 
     except PermissionError as e:
         logging.error(f"[PERMISSION ERROR] {device}: Permission denied - {e}")
+        error_dict[device] = f"[PERMISSION ERROR] {device}: Permission denied"
 
     except EOFError as e:
         logging.error(f"[EOF ERROR] {device}: Unexpected end of input - {e}")
-
+        error_dict[device] = f"[EOF ERROR] {device}: Unexpected end of input"
     except OSError as e:
         logging.error(f"[OS ERROR] {device}: {e}")
+        error_dict[device] = f"[OS ERROR] {device}: {e}"
 
     except Exception as e:
         logging.error(f"[ERROR] {device}: {type(e).__name__} - {e}")
+        error_dict[device] = f"[ERROR] {device}: {type(e).__name__} - {e}"
+    return False
 
 # ============================================================
 # MAIN
 # ============================================================ 
-def main():
+def main(success_counter: int = success_counter, fail_counter: int = fail_counter):
     try:
         banner()
         # call the banner function to print the banner at the start of the script
@@ -262,9 +292,14 @@ def main():
         # with element[0] = username and element[1] = password
 
         for device in open_devices(args.devices):
-            process_device(device, commands, get_credentials, args.mode, args.type)
+            if process_device(device, commands, get_credentials, args.mode, args.type, error_dict):
             # call the process_device function to connect to the device and execute the commands
             # pass the device IP, commands list, credentials tuple and args.mode to the function
+                success_counter += 1
+            else:
+                fail_counter += 1
+
+        #print(f"success_counter is: {success_counter}")
 
     except KeyboardInterrupt:
         logging.info("\n[INFO] Script interrupted by user.")
@@ -277,6 +312,8 @@ def main():
 
     except FileEmptyError as e:
         logging.error(f"[FILE EMPTY ERROR] Empty file: {e}")
+
+    summary(success_counter, fail_counter, error_dict)
 
 if __name__ == "__main__":
     main()

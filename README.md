@@ -42,7 +42,7 @@ sudo apt update
 sudo apt upgrade -y
 sudo apt install python3 -y python3-pip git -y
 pip install -U netmiko
-git clone github.com/ar-ho/neth ~/neth
+git clone https://github.com/ar-ho/neth ~/neth
 python3 ~/neth/neth.py --help
 ```
 

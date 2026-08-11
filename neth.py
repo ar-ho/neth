@@ -131,7 +131,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument(
         "-c", "--commands",
         default="commands.txt",
-        help="Path to the file containing configuration commands (default: commands.txt)"
+        help="Path to the file containing show or configuration commands (default: commands.txt)"
     )
     # same as above but for the commands file
 
@@ -147,7 +147,6 @@ def parse_arguments() -> argparse.Namespace:
         choices=["show", "config"],
         help="Execute the commands from the file in privileged exec mode (show) or configuration mode (config) (default: show)"
     )
-
     # same as above but for the mode of execution, either show or config
     # you can use it like this script.py --mode show or script.py --mode config
 

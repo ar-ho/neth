@@ -29,8 +29,8 @@ The main goals I wanted to achieve were the following:
 - Easy to use.
 
 This script can be used by non technical people easily.
-This makes it useful for many everyday network-related tasks. 
-For example, sales employees could use it to check the software version across multiple devices, while support engineers could configure a new user on all devices in a network without having to log in to each device manually.
+Which makes it useful for many everyday network-related tasks. 
+For example, sales employees could use it to check the software version accross multiple devices, while support engineers could configure a new user on all devices in a network without having to log in to each device manually.
 
 ## 🚀 Quick Start
 ### Linux (Debian/Ubuntu)
@@ -46,7 +46,7 @@ git clone https://github.com/ar-ho/neth ~/neth
 python3 ~/neth/neth.py --help
 ```
 
-After cloning the repository ```run neth.py --help``` to display the available options and commands.
+After cloning the repository run ```neth.py --help``` to display the available options.
 
 ### Windows
 Install Python 3, Pip and Git if they are not already installed.
@@ -59,7 +59,7 @@ python -m pip install -U netmiko
 python .\neth.py --help
 ```
 
-After cloning the repository ```run neth.py --help``` to display the available options and commands.
+After cloning the repository run ```neth.py --help``` to display the available options.
 
 ## 📖 Usage
 ```

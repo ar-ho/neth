@@ -89,10 +89,10 @@ def open_devices(devices_file: str = "devices.txt") -> list[str]:
             # raise a custom exception if the devices file is empty
     return devices
 
-def open_output(output_file: str = "output.txt") -> list[str]:
-    with open(output_file) as f:
-        return f.read().splitlines()
-        # open the file output.txt, a file to redirect the output to 
+def write_output(output: str, device: str) -> None:
+        with open(f"{device}_{datetime.now().strftime('%d%m%Y_%H%M')}.txt", "w") as logfile:
+            logfile.write(output)
+            # open the file output.txt, a file to redirect the output to 
 
 # ============================================================
 # LOGGING
@@ -224,11 +224,15 @@ def process_device(device: str, commands: list[str], credentials: tuple[str, str
         # send_command() cannot directly execute commands from a file, 
         # so we have to iterate over the commands in the file 
 
+        write_output(output, device)
+
+        '''
         with open(f"{device}_{datetime.now().strftime('%d%m%Y_%H%M')}.txt", "w") as logfile:
             logfile.write(output)
         net_connect.disconnect()
         # the output of the commands is stored in a variable named output
         # write the output of the commands from commands.txt to a file named IP + timestamp + .txt
+        '''
 
         logging.info(f"Completed execution on {device}\n")
         # disconnect and move on to the next iteration of the for loop 

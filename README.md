@@ -120,11 +120,11 @@ root@UbuntuBox:~# cat devices.txt
 ```
 
 ### example runs
-- Runs show commands: 
+Runs show commands:<br> 
 ```root@UbuntuBox:~# python3 neth.py --mode show```
-- Runs config commands: 
+Runs config commands: <br>
 ```root@UbuntuBox:~# python3 neth.py --mode config```
-- Runs show commands from a custom commands file 
+Runs show commands from a custom commands file: <br> 
 ```root@UbuntuBox:~# python3 neth.py -c /home/anon/Downloads/mycommands.md```
 
 ## 🤝 Contributing

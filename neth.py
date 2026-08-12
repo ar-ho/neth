@@ -225,14 +225,6 @@ def process_device(device: str, commands: list[str], credentials: tuple[str, str
 
         write_output(output, device)
 
-        '''
-        with open(f"{device}_{datetime.now().strftime('%d%m%Y_%H%M')}.txt", "w") as logfile:
-            logfile.write(output)
-        net_connect.disconnect()
-        # the output of the commands is stored in a variable named output
-        # write the output of the commands from commands.txt to a file named IP + timestamp + .txt
-        '''
-
         logging.info(f"Completed execution on {device}\n")
         # disconnect and move on to the next iteration of the for loop 
         # to execute the same steps on the next device

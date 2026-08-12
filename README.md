@@ -101,6 +101,7 @@ show running-config
 
 Here is an example of a configuration task which creates vlan 2 and then configures vlan 2 on an interface, adds a description and finally brings the interface up:
 ```
+root@UbuntuBox:~# cat commands.txt 
 vlan 2
 interface Ethernet0/0
 description HelloWorld
@@ -117,6 +118,12 @@ root@UbuntuBox:~# cat devices.txt
 192.168.122.103
 192.168.122.104
 ```
+
+### example runs
+Runs show commands: ```root@UbuntuBox:~# python3 neth.py --mode show```
+Runs config commands: ```root@UbuntuBox:~# python3 neth.py --mode config```
+Runs show commands from a custom commands file ```root@UbuntuBox:~# python3 neth.py -c /home/anon/Downloads/mycommands.md```
+
 
 ## 🤝 Contributing
 Feel free to clone, use and enhance this code.
